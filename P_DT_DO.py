@@ -43,10 +43,10 @@ with alive_bar(4*3*Resolution**4) as bar:
                     a = i/Resolution - 1
                     for j in range(0,Resolution):
                         y = j/Resolution + 0.01
-                        CL_Model.Update(a1=a, y=y, Bi_DO=Bi_DO, Ts = Ts)
+                        CL_Model.Update(wc, Ts, a1=a, y=y, Bi_DO=Bi_DO)
                         Num, Den = CL_Model.CL()
                         roots = np.roots(Den)
-                        if any(np.round(abs(roots),10)>round(0.99999999999999999999,10)):
+                        if any(np.absolute(roots) > 1.0000004):
                             sp_error = -10
                             tr_error = -10
                             L2_error = -10

@@ -31,12 +31,12 @@ with alive_bar(4*3*Resolution**3) as bar:
                             for p in range(0,Resolution):
                                 Ts = 2*np.pi/(2*wc * 1/(p/Resolution + 0.1) )
                                 
-                                CL_Model.Update(a1 = a1, y = y, a2 = a2, r = r, Bi_DO = Bi_Do, Ts = Ts)
+                                CL_Model.Update(wc, Ts, a1 = a1, y = y, a2 = a2, r = r, Bi_DO = Bi_Do)
 
                                 Num, Den = CL_Model.CL()
                                 roots = np.roots(Den)
 
-                                if any(roots.real>0):
+                                if any(np.absolute(roots) > 1.0000004):
                                     S[o][p][i][j][Resolution - l - 1][n]= -2
 
                     bar()

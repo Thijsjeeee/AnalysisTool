@@ -260,7 +260,8 @@ class DT_System:
     def __init__(self, Controller:str, 
                 DO:bool, 
                 m :float, 
-                Ts:float,
+                wc:float,
+                Ts:float = 0.01,
                 Relation:float = 0.1,
                 Bd:float = 10, 
                 Bi:float = 2, 
@@ -278,8 +279,8 @@ class DT_System:
         PIDF_type: {'Series','Parallel'} 
 
         """
-        
-        self.wc = (2*np.pi*1/Ts)*Relation
+        self.wc = wc
+        #self.wc = (2*np.pi*1/Ts)*Relation
         self.Ts = Ts
 
         self.Controller = Controller
@@ -304,7 +305,8 @@ class DT_System:
 
         self.PIDF_type = PIDF_type
     def Update(self, 
-               Ts:float,
+               wc:float,
+               Ts:float = 0.01,
                Relation:float = 0.1,
                Bi_DO:float = 2, 
                a1:float = 0, 
@@ -315,7 +317,8 @@ class DT_System:
                r:float = 0.01 ,
                dc:float = 0.8):
 
-        self.wc = (2*np.pi*1/Ts)*Relation
+        self.wc = wc
+        #self.wc = (2*np.pi*1/Ts)*Relation
         self.Ts = Ts
 
         self.Bi_DO      = Bi_DO
@@ -533,7 +536,31 @@ class DT_System:
         b , a = self.f_DO(self.DO)
         d , c = self.f_Controller(self.Controller)
 
-        Num = [c[0]*a[0],
+        Num = [ d[0]*b[0],
+                d[0]*b[1] + d[1]*b[0],
+                d[0]*b[2] + d[1]*b[1] + d[2]*b[0],
+                d[0]*b[3] + d[1]*b[2] + d[2]*b[1] + d[3]*b[0],
+                d[0]*b[4] + d[1]*b[3] + d[2]*b[2] + d[3]*b[1],
+                d[0]*b[5] + d[1]*b[4] + d[2]*b[3] + d[3]*b[2],
+                d[0]*b[6] + d[1]*b[5] + d[2]*b[4] + d[3]*b[3],
+                d[0]*b[7] + d[1]*b[6] + d[2]*b[5] + d[3]*b[4],
+                d[0]*b[8] + d[1]*b[7] + d[2]*b[6] + d[3]*b[5],
+                d[0]*b[9] + d[1]*b[8] + d[2]*b[7] + d[3]*b[6],
+                d[0]*b[10]+ d[1]*b[9] + d[2]*b[8] + d[3]*b[7],
+                d[0]*b[11]+ d[1]*b[10]+ d[2]*b[9] + d[3]*b[8],
+                d[0]*b[12]+ d[1]*b[11]+ d[2]*b[10]+ d[3]*b[9],
+                d[0]*b[13]+ d[1]*b[12]+ d[2]*b[11]+ d[3]*b[10],
+                d[0]*b[14]+ d[1]*b[13]+ d[2]*b[12]+ d[3]*b[11],
+                d[0]*b[15]+ d[1]*b[14]+ d[2]*b[13]+ d[3]*b[12],
+                d[0]*b[16]+ d[1]*b[15]+ d[2]*b[14]+ d[3]*b[13],
+                d[0]*b[17]+ d[1]*b[16]+ d[2]*b[15]+ d[3]*b[14],
+                d[0]*b[18]+ d[1]*b[17]+ d[2]*b[16]+ d[3]*b[15],
+                          + d[1]*b[18]+ d[2]*b[17]+ d[3]*b[16],
+                                      + d[2]*b[18]+ d[3]*b[17],
+                                                  + d[3]*b[18]]
+
+
+        """Num = [c[0]*a[0],
                c[0]*a[1] + c[1]*a[0],
                c[0]*a[2] + c[1]*a[1] + c[2]*a[0],
                c[0]*a[3] + c[1]*a[2] + c[2]*a[1] + c[3]*a[0],
@@ -554,7 +581,7 @@ class DT_System:
                c[0]*a[18]+ c[1]*a[17]+ c[2]*a[16]+ c[3]*a[15],
                          + c[1]*a[18]+ c[2]*a[17]+ c[3]*a[16],
                                      + c[2]*a[18]+ c[3]*a[17],
-                                                 + c[3]*a[18]]
+                                                 + c[3]*a[18]]"""
 
         Den = [c[0]*a[0]                                     + d[0]*b[0],
                c[0]*a[1] + c[1]*a[0]                         + d[0]*b[1] + d[1]*b[0],
@@ -565,7 +592,7 @@ class DT_System:
                c[0]*a[6] + c[1]*a[5] + c[2]*a[4] + c[3]*a[3] + d[0]*b[6] + d[1]*b[5] + d[2]*b[4] + d[3]*b[3],
                c[0]*a[7] + c[1]*a[6] + c[2]*a[5] + c[3]*a[4] + d[0]*b[7] + d[1]*b[6] + d[2]*b[5] + d[3]*b[4],
                c[0]*a[8] + c[1]*a[7] + c[2]*a[6] + c[3]*a[5] + d[0]*b[8] + d[1]*b[7] + d[2]*b[6] + d[3]*b[5],
-               c[0]*a[8] + c[1]*a[8] + c[2]*a[7] + c[3]*a[6] + d[0]*b[9] + d[1]*b[8] + d[2]*b[7] + d[3]*b[6],
+               c[0]*a[9] + c[1]*a[8] + c[2]*a[7] + c[3]*a[6] + d[0]*b[9] + d[1]*b[8] + d[2]*b[7] + d[3]*b[6],
                c[0]*a[10]+ c[1]*a[9] + c[2]*a[8] + c[3]*a[7] + d[0]*b[10]+ d[1]*b[9] + d[2]*b[8] + d[3]*b[7],
                c[0]*a[11]+ c[1]*a[10]+ c[2]*a[9] + c[3]*a[8] + d[0]*b[11]+ d[1]*b[10]+ d[2]*b[9] + d[3]*b[8],
                c[0]*a[12]+ c[1]*a[11]+ c[2]*a[10]+ c[3]*a[9] + d[0]*b[12]+ d[1]*b[11]+ d[2]*b[10]+ d[3]*b[9],
@@ -576,7 +603,7 @@ class DT_System:
                c[0]*a[17]+ c[1]*a[16]+ c[2]*a[15]+ c[3]*a[14]+ d[0]*b[17]+ d[1]*b[16]+ d[2]*b[15]+ d[3]*b[14],
                c[0]*a[18]+ c[1]*a[17]+ c[2]*a[16]+ c[3]*a[15]+ d[0]*b[18]+ d[1]*b[17]+ d[2]*b[16]+ d[3]*b[15],
                          + c[1]*a[18]+ c[2]*a[17]+ c[3]*a[16]            + d[1]*b[18]+ d[2]*b[17]+ d[3]*b[16],
-                                     + c[2]*a[18]+ c[3]*a[17]                        + d[2]*b[17]+ d[3]*b[17],
+                                     + c[2]*a[18]+ c[3]*a[17]                        + d[2]*b[18]+ d[3]*b[17],
                                                  + c[3]*a[18]                                    + d[3]*b[18]]
         return Num, Den
 

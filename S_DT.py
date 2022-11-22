@@ -30,12 +30,12 @@ with alive_bar(4*3*Resolution**2) as bar:
                             Ts = 2*np.pi/(2*wc * 1/(o/Resolution + 0.1) )
                         
 
-                            CL_Model.Update(a1 = a1, y = y, a2 = a2, r = r, Ts = Ts)
+                            CL_Model.Update(wc, Ts, a1 = a1, y = y, a2 = a2, r = r)
 
                             Num, Den = CL_Model.CL()
                             roots = np.roots(Den)
 
-                            if any(np.absolute(roots) > 1):
+                            if any(np.absolute(roots) > 1.0000004):
 
                                 S[o][i][j][Resolution - l - 1][n]= -2
 
