@@ -30,11 +30,11 @@ m = 1
 with alive_bar(4*3*Resolution**4) as bar:
     Do = True
     for Controller in ['PD', 'PDF', 'PID', 'PIDF']:
-        S0=np.zeros((4,Resolution,Resolution,3*Resolution))
+        S0=np.zeros((4,Resolution,Resolution,Resolution,3*Resolution))
         S = S0.copy()    
         CL_Model = Model.DT_System(Controller,Do,m,wc)
         for l in range(0,Resolution):
-            Ts = 2*np.pi/(2*wc * 1/(l/Resolution + 0.1) )
+            Ts = 2*np.pi/(2*wc * 1/(l/Resolution + 0.01) )
             
             for k in range(0,Resolution):
                 Bi_DO = np.logspace(-3,0.3,num=Resolution)[k]
@@ -46,14 +46,16 @@ with alive_bar(4*3*Resolution**4) as bar:
                         CL_Model.Update(wc, Ts, a1=a, y=y, Bi_DO=Bi_DO)
                         Num, Den = CL_Model.CL()
                         roots = np.roots(Den)
-                        if any(np.absolute(roots) > 1.0000004):
+                        if any(np.absolute(roots) > 1.0004):
                             sp_error = -10
                             tr_error = -10
                             L2_error = -10
-                            S[0][k][Resolution - j - 1][i]=- 10
+                            S[0][k][l][Resolution - j - 1][i]=- 10
                         else:
-                            system = signal.lti(Num, Den)
-                            T,yout,xout = signal.lsim(system, ref, t)
+                            system = signal.dlti(Num, Den, Ts)
+                            T,yout = signal.dlsim(system, ref, t)
+                            yout = yout[0]
+                            
 
                             error = ref - yout
                             tr_error = np.max((error[0:int((1/0.001 * 0.807))]))
@@ -62,9 +64,9 @@ with alive_bar(4*3*Resolution**4) as bar:
                             for er in error:
                                 L2_error = L2_error + er**2 * 0.001
                         
-                        S[1][k][Resolution - j - 1][i]=L2_error
-                        S[2][k][Resolution - j - 1][i]=tr_error
-                        S[3][k][Resolution - j - 1][i]=sp_error
+                        S[1][k][l][Resolution - j - 1][i]=L2_error
+                        S[2][k][l][Resolution - j - 1][i]=tr_error
+                        S[3][k][l][Resolution - j - 1][i]=sp_error
                         bar()
 
         np.save("Performance\Data_DT_DO\Data_"+ Controller + "_DO_" +str(Do) + "_"+str(Resolution) + '.npy', S)

@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 from alive_progress import alive_bar; import time
 import matplotlib
+import control
 
 #-------------------------------Generate Path----------------------------------
 pg1 = pathgenerator.PathGenerator()
@@ -36,7 +37,12 @@ with alive_bar(4*3*Resolution**3) as bar:
         S0=np.zeros((4,Resolution,Resolution,3*Resolution))
         S = S0.copy()
         for k in range(0,Resolution):
-            Ts = 2*np.pi/(2*wc * 1/(k/Resolution + 0.1) )
+            Ts = 2*np.pi/(2*wc * 1/(k/Resolution + 0.01) )
+            ref = []
+            t = np.arange(0.0, 2.0, Ts)
+            for time_instant in t:
+                ref.append(pg1.generate_x(time_instant))
+
             for i in range(0,3*Resolution):
                 a = i/Resolution - 1
                 for j in range(0,Resolution):
@@ -44,21 +50,25 @@ with alive_bar(4*3*Resolution**3) as bar:
                     CL_Model.Update(wc,Ts, a1=a, y=y)
                     Num, Den = CL_Model.CL()
                     roots = np.roots(Den)
-                    if any(np.absolute(roots) > 1.0000004):
+                    if any(np.round(abs(roots),10)>round(0.99999999999999999999,10)):
                         sp_error = -10
                         tr_error = -10
                         L2_error = -10
                         S[0][k][Resolution - j - 1][i]=- 10
                     else:
-                        system = signal.lti(Num, Den, Ts)
-                        T,yout,xout = signal.lsim(system, ref, t)
+                        system = control.TransferFunction(Num, Den, Ts)
+                        system = control.minreal(system)
+                        system = system.returnScipySignalLTI()[0][0]
+
+                        T,yout = signal.dlsim(system, ref, t=t)
+                        yout = yout.T[0]
 
                         error = ref - yout
-                        tr_error = np.max((error[0:int((1/0.001 * 0.807))]))
-                        sp_error = np.max((error[int((1/0.001 * 0.807))+1:-1]))
+                        tr_error = np.max((error[0:int((1/Ts * 0.807))]))
+                        sp_error = np.max((error[int((1/Ts * 0.807))+1:-1]))
                         L2_error = 0
                         for er in error:
-                            L2_error = L2_error + er**2 * 0.001
+                            L2_error = L2_error + er**2 * Ts
                     
                     S[1][k][Resolution - j - 1][i]=L2_error
                     S[2][k][Resolution - j - 1][i]=tr_error

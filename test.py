@@ -9,27 +9,26 @@ import matplotlib
 
 Resolution = 15
 m = 1
-wc = 10
-Controller = 'PID'
-Do = False
-Ts = 0.01
+wc = 63.8
+Controller = 'PD'
+Do = True
+Ts = 0.1
 with alive_bar(3*Resolution**2) as bar:
     S0=np.zeros((Resolution,3*Resolution), dtype = int)
     S = S0.copy()    
-    CL_Model = Model.DT_System(Controller,Do,m,wc,Ts)
+    CL_Model = Model.DT_System(Controller,Do,m,wc,Ts,Bi_DO=0.0001)
     for l in range(0,Resolution):
         y = l/Resolution + 0.01
         for n in range(0,3*Resolution):
             a1 = n/Resolution - 1
             
 
-            CL_Model.Update(wc,Ts , a1 = a1, y = y)
+            CL_Model.Update(wc, Ts , a1 = a1, y = y,Bi_DO=0.0001)
 
 
 
             Num, Den = CL_Model.CL()
             roots = np.roots(Den)
-            print(np.absolute(roots))
 
             if any(abs(roots)>1.000004):
 

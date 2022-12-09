@@ -14,7 +14,8 @@ wc = 10
 
 with alive_bar(4*3*Resolution**2) as bar:
     Do = False
-    for Controller in ['PD', 'PDF', 'PID', 'PIDF']:
+    for Controller in ['PD','PDF','PID', 'PIDF']:
+        
         S0=np.zeros((Resolution,Resolution,Resolution*3,Resolution,3*Resolution), dtype = int)
         S = S0.copy()    
         CL_Model = Model.DT_System(Controller,Do,m,wc)
@@ -27,17 +28,15 @@ with alive_bar(4*3*Resolution**2) as bar:
                     for n in range(0,3*Resolution):
                         a1 = n/Resolution - 1
                         for o in range(0,Resolution):
-                            Ts = 2*np.pi/(2*wc * 1/(o/Resolution + 0.1) )
-                        
-
+                            Ts = 2*np.pi/(2*wc * 1/(o/Resolution + 0.01) )
                             CL_Model.Update(wc, Ts, a1 = a1, y = y, a2 = a2, r = r)
-
                             Num, Den = CL_Model.CL()
+
                             roots = np.roots(Den)
 
-                            if any(np.absolute(roots) > 1.0000004):
+                            if any(np.round(abs(roots),10)>round(0.99999999999999999999,10)):
 
-                                S[o][i][j][Resolution - l - 1][n]= -2
+                                S[o][i][j][Resolution - l - 1][n]= -10
 
                 bar()
 
